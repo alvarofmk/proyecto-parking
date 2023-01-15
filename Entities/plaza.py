@@ -1,4 +1,4 @@
-from Entities.estado import Estado
+from Entities.Enums.estado import Estado
 
 class Plaza:
 
