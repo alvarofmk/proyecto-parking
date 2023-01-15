@@ -1,13 +1,14 @@
 from datetime import datetime
 class Ocupa:
 
-    def __init__(self, plaza, cliente, pin, entrada=datetime.now(), salida=None, activo=True):
+    def __init__(self, plaza, cliente, pin, entrada=datetime.now(), salida=None, costeTotal=None, activo=True):
         self.__plaza = plaza
         self.__cliente = cliente
         self.__pin = pin
         self.__entrada = entrada
         self.__salida = salida
         self.__activo = activo
+        self.__costeTotal = costeTotal
 
     def __str__(self):
         return f"Entrada: {self.entrada}, Matrícula del vehículo: {self.cliente.matricula}, Clave pin: {self.pin}"
@@ -59,3 +60,11 @@ class Ocupa:
     @activo.setter
     def activo(self, activo):
         self.__activo = activo
+
+    @property
+    def costeTotal(self):
+        return self.__costeTotal
+
+    @costeTotal.setter
+    def costeTotal(self, costeTotal):
+        self.__costeTotal = costeTotal
