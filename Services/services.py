@@ -4,6 +4,7 @@ from Entities.Enums.estado import Estado
 from Entities.abonado import Abonado
 from Entities.cliente import Cliente
 from Entities.ocupa import Ocupa
+from Entities.tipoAbono import TipoAbono
 from Entities.tipoPlaza import TipoPlaza
 from Entities.plaza import Plaza
 from Entities.Enums.tipoVehiculo import TipoVehiculo
@@ -18,6 +19,20 @@ def initConfig():
     ocupas = []
     clientes = []
     preid = 0
+
+    abonos = []
+    mensual = TipoAbono("Mensual", 1, 25.0)
+    trimestral = TipoAbono("Trimestral", 3, 70.0)
+    semestral = TipoAbono("Semestral", 6, 130.0)
+    anual = TipoAbono("Anual", 12, 200.0)
+    abonos.append(mensual)
+    abonos.append(trimestral)
+    abonos.append(semestral)
+    abonos.append(anual)
+
+    archivoAbonos = open("Persistence/tiposAbonos.pickle", "wb")
+    pickle.dump(abonos, archivoAbonos)
+    archivoAbonos.close()
 
     archivoTipos = open("../Persistence/tipos.pickle", "wb")
     pickle.dump(tiposPlazas, archivoTipos)

@@ -13,7 +13,7 @@ def printMenuUser():
     print("0. Volver")
 
 def printMenuTipoVehiculo():
-    print("Por favor indique el tipo de su vehículo:")
+    print("Seleccione el tipo del vehículo:")
     print("1. Turismo")
     print("2. Motocicleta")
     print("3. Vehículo para personas con movilidad reducida")

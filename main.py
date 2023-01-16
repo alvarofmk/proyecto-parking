@@ -1,4 +1,5 @@
 import random
+from time import strftime
 
 from Entities.abonado import Abonado
 from Entities.cliente import Cliente
@@ -6,22 +7,26 @@ from Entities.Enums.estado import Estado
 from Entities.Enums.tipoVehiculo import TipoVehiculo
 from Entities.ocupa import Ocupa
 from Entities.plaza import Plaza
+from Entities.tipoAbono import TipoAbono
 from Entities.tipoPlaza import TipoPlaza
 from View.view import *
 import pickle
 from datetime import datetime, timedelta
 from Services.services import initConfig
 
+archivoAbonos = open("Persistence/tiposAbonos.pickle", "rb")
 archivoPlazas = open("Persistence/plazas.pickle", "rb")
 archivoTipos = open("Persistence/tipos.pickle", "rb")
 archivoClientes = open("Persistence/clientes.pickle", "rb")
 archivoOcupa = open("Persistence/ocupas.pickle", "rb")
 
+abonos = pickle.load(archivoAbonos)
 plazas = pickle.load(archivoPlazas)
 tipos = pickle.load(archivoTipos)
 clientes = pickle.load(archivoClientes)
 ocupas = pickle.load(archivoOcupa)
 
+archivoAbonos.close()
 archivoPlazas.close()
 archivoOcupa.close()
 archivoClientes.close()
@@ -105,7 +110,7 @@ while seleccionMenu != 0:
                 print("Introduzca su matrícula")
                 matricula = input()
                 try:
-                    cliente = next(cliente for cliente in clientes if isinstance(cliente, Abonado) and cliente.matricula == matricula and cliente.dni == dni)
+                    cliente = next(cliente for cliente in clientes if cliente.activo and cliente.matricula == matricula and cliente.dni == dni)
                     print(f"Puede proceder a estacionar su vehiculo, su plaza es la {cliente.plaza.id}")
                     cliente.plaza.estado = Estado.ABONOOCUPADA
                     ocupas.append(Ocupa(cliente.plaza, cliente, cliente.pin, costeTotal=0))
@@ -160,8 +165,53 @@ while seleccionMenu != 0:
                 for cobro in cobros:
                     print(f"Plaza {cobro.plaza.id}({cobro.plaza.tipoPlaza.tipo}) - {cobro.entrada} hasta {cobro.salida} - Total = {cobro.costeTotal} €")
             elif seleccionSubmenu == 3:
-                pass
+                clientesAbonados = [cliente for cliente in clientes if isinstance(cliente, Abonado) and cliente.activo]
+                for cliente in clientesAbonados:
+                    print(f"{cliente.nombre} {cliente.apellidos}: Suscripcion {cliente.tipoAbono}, caduca el {cliente.fechaCancelacion.strftime('%d de %B del %Y')}")
             elif seleccionSubmenu == 4:
-                pass
+                print("1. Alta de abonado")
+                print("2. Modificación de datos del abonado")
+                print("3. Baja del abonado")
+                seleccionSubmenu2 = int(input())
+
+                if seleccionSubmenu2 == 1:
+                    dni = input("Dni del abonado: ")
+                    nombre = input("Nombre del abonado: ")
+                    apellidos = input("Apellidos del abonado: ")
+                    email = input("Email del abonado: ")
+
+                    print("Seleccione el tipo de abono:")
+                    for i, abono in enumerate(abonos):
+                        print(f"{i+1}. {abono.nombre} - {abono.precio}€")
+                    tipoAbono = abonos[int(input()) - 1]
+                    tarjeta = input("Tarjeta del abonado: ")
+
+                    printMenuTipoVehiculo()
+                    tipoVehiculo = list(TipoVehiculo)[int(input()) - 1]
+                    matricula = input("Matricula del vehículo: ")
+                    plaza = next(plaza for plaza in plazas if plaza.estado == Estado.LIBRE and plaza.tipoPlaza.tipo == tipoVehiculo)
+                    pin = random.randint(100000, 999999)
+                    nuevoCliente = Abonado(matricula, tipoVehiculo, dni, nombre, apellidos, email, tarjeta, tipoAbono, datetime.now(), datetime.now() + timedelta(days = 30 * tipoAbono.duracion), True, plaza, pin)
+                    clientes.append(nuevoCliente)
+                    plaza.estado = Estado.ABONOLIBRE
+                    print("El cliente se ha suscrito con éxito.")
+                elif seleccionSubmenu2 == 2:
+                    pass
+                elif seleccionSubmenu2 == 3:
+                    pass
             elif seleccionSubmenu == 5:
-                pass
+                print("1. Consultar los abonos que caducan en un mes")
+                print("2. Consultar los abonos que caducan en menos de 10 días")
+                seleccionSubmenu2 = int(input())
+                if seleccionSubmenu2 == 1:
+                    mes = int(input("Indique el nº del mes que quiere consultar: "))
+                    anio = int(input("Indique el año que quiere consultar: "))
+                    aCaducar = [cliente for cliente in clientes if isinstance(cliente, Abonado) and cliente.fechaCancelacion.month == mes and cliente.fechaCancelacion.year == anio]
+                    for cliente in aCaducar:
+                        print(f"{cliente.nombre} {cliente.apellidos}: Suscripcion {cliente.tipoAbono}, caduca el {cliente.fechaCancelacion.strftime('%d de %B del %Y')}")
+                    if len(aCaducar) == 0: print("No hay ningún cliente cuyo abono caduque en ese mes.")
+                elif seleccionSubmenu2 == 2:
+                    aCaducar = [cliente for cliente in clientes if isinstance(cliente, Abonado) and cliente.fechaCancelacion > datetime.now() and cliente.fechaCancelacion < datetime.now() + timedelta(days = 10)]
+                    for cliente in aCaducar:
+                        print(f"{cliente.nombre} {cliente.apellidos}: Suscripcion {cliente.tipoAbono}, caduca el {cliente.fechaCancelacion.strftime('%d de %B del %Y')}")
+                    if len(aCaducar) == 0: print("No hay ningún cliente cuyo abono caduque en 10 días.")
