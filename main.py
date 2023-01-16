@@ -91,9 +91,30 @@ if seleccionMenu == 1:
             except:
                 print("Los datos no coinciden")
         elif seleccionSubmenu == 3:
-            pass
+            print("Bienvenido de nuevo, por favor, introduzca su dni:")
+            dni = input()
+            print("Introduzca su matrícula")
+            matricula = input()
+            try:
+                cliente = next(cliente for cliente in clientes if isinstance(cliente, Abonado) and cliente.matricula == matricula and cliente.dni == dni)
+                print("Puede proceder a sacar su vehiculo")
+                cliente.plaza.estado = Estado.ABONOOCUPADA
+                ocupa = Ocupa(cliente.plaza, cliente, cliente.pin, costeTotal=0)
+            except:
+                print("Ha habido un error en los datos")
         elif seleccionSubmenu == 4:
-            pass
+            print("Bienvenido de nuevo, por favor, introduzca su dni:")
+            dni = input()
+            print("Introduzca su matrícula:")
+            matricula = input()
+            print("Introduzca su pin:")
+            try:
+                ocupa = next(ocupa for ocupa in ocupas if ocupa.activo and ocupa.pin == pin and ocupa.cliente.matricula == matricula and ocupa.cliente.dni == dni)
+                print("Puede proceder a sacar su vehiculo")
+                cliente.plaza.estado = Estado.ABONOLIBRE
+                ocupa.activo = False
+            except:
+                print("Ha habido un error en los datos")
         elif seleccionSubmenu == 0:
             pass
 elif seleccionMenu == 2:
