@@ -1,6 +1,10 @@
+from Entities.cliente import Cliente
+
+
 class Abonado(Cliente):
 
-    def __init__(self, dni, nombre, apellidos, email, tarjeta, tipoAbono, fechaSuscripcion, fechaCancelacion, activo, plaza, pin):
+    def __init__(self, matricula, tipoVehiculo, dni, nombre, apellidos, email, tarjeta, tipoAbono, fechaSuscripcion, fechaCancelacion, activo, plaza, pin):
+        super().__init__(matricula, tipoVehiculo)
         self.__dni = dni
         self.__nombre = nombre
         self.__apellidos = apellidos

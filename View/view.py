@@ -17,3 +17,12 @@ def printMenuTipoVehiculo():
     print("1. Turismo")
     print("2. Motocicleta")
     print("3. Vehículo para personas con movilidad reducida")
+
+def printMenuAdmin():
+    print("Por favor indique lo que desea hacer:")
+    print("1. Consultar estado del parking")
+    print("2. Consultar facturación")
+    print("3. Consultar abonos")
+    print("4. Gestión de abonos")
+    print("5. Caducidad de abonos")
+    print("0. Volver")
