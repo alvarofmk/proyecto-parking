@@ -118,4 +118,10 @@ if seleccionMenu == 1:
         elif seleccionSubmenu == 0:
             pass
 elif seleccionMenu == 2:
-    pass
+    print("Por favor indique lo que desea hacer:")
+    print("1. Consultar estado del parking")
+    print("2. Consultar facturación")
+    print("3. Consultar abonos")
+    print("4. Gestión de abonos")
+    print("5. Caducidad de abonos")
+    seleccionSubmenu = input()
