@@ -36,11 +36,17 @@ archivoOcupa.close()
 archivoClientes.close()
 archivoTipos.close()
 def persistCollections():
-    while True:
-        time.sleep(60)
-        for cliente in clientes:
-            print(cliente.matricula)
-        """
+    on = True
+    while on:
+        i=0
+        while i < 5:
+            if mainThread.is_alive():
+                time.sleep(1)
+                i += 1
+            else:
+                i = 5
+                on = False
+
         open("Persistence/tiposAbonos.pickle", "w").close()
         open("Persistence/ocupas.pickle", "w").close()
         open("Persistence/plazas.pickle", "w").close()
@@ -62,7 +68,7 @@ def persistCollections():
         archivoClientes = open("Persistence/clientes.pickle", "wb")
         pickle.dump(clientes, archivoClientes)
         archivoClientes.close()
-        """
+
 
 def mainMethod():
     seleccionMenu = 1;
