@@ -16,6 +16,7 @@ import pickle
 from datetime import datetime, timedelta
 from Services.services import initConfig
 from threading import Thread
+import threading
 
 archivoAbonos = open("Persistence/tiposAbonos.pickle", "rb")
 archivoPlazas = open("Persistence/plazas.pickle", "rb")
@@ -36,7 +37,7 @@ archivoClientes.close()
 archivoTipos.close()
 def persistCollections():
     while True:
-        time.sleep(15)
+        time.sleep(60)
         for cliente in clientes:
             print(cliente.matricula)
         """
