@@ -31,12 +31,12 @@ def persistCollections():
     on = True
     while on:
         i=0
-        while i < 5:
+        while i < 300:
             if mainThread.is_alive():
                 time.sleep(1)
                 i += 1
             else:
-                i = 5
+                i = 300
                 on = False
 
         open("Persistence/tiposAbonos.pickle", "w").close()
@@ -63,23 +63,29 @@ def persistCollections():
 
 
 def mainMethod():
-    seleccionMenu = 1;
+    seleccionMenu = -1;
 
     while seleccionMenu != 0:
 
-        seleccionSubmenu = 1;
-        seleccionSubmenu2 = 1;
+        seleccionSubmenu = -1;
+        seleccionSubmenu2 = -1;
         seleccionSubmenu3 = 1;
         confirmacion = 1;
         printMenuRoles()
-        seleccionMenu = int(input())
+        try:
+            seleccionMenu = int(input())
+        except:
+            print("Por favor introduzca un número.")
 
         if seleccionMenu == 1:
 
             while seleccionSubmenu != 0:
 
                 printMenuUser()
-                seleccionSubmenu = int(input())
+                try:
+                    seleccionSubmenu = int(input())
+                except:
+                    print("Por favor introduzca un número.")
 
                 if seleccionSubmenu == 1:
                     plazasDisponibles = [plaza for plaza in plazas if plaza.estado == Estado.LIBRE]
@@ -89,34 +95,40 @@ def mainMethod():
                     if len(plazasDisponibles) > 0:
                         printPlazasDisponibles(plazasDisponibles, disponiblesTurismo, disponiblesMotos, disponiblesReducidas)
                         printMenuTipoVehiculo()
-                        tipoVehiculo = list(TipoVehiculo)[int(input()) - 1]
-
-                        if (tipoVehiculo == TipoVehiculo.TURISMO and disponiblesTurismo > 0) or (tipoVehiculo == TipoVehiculo.MOTOCICLETA and disponiblesMotos > 0) or (tipoVehiculo == TipoVehiculo.MOVILIDADREDUCIDA and disponiblesReducidas > 0) :
-                            matricula = input("Por favor introduzca su matrícula: ")
-                            plaza = [plaza for plaza in plazasDisponibles if plaza.tipoPlaza.tipo == tipoVehiculo][0]
-                            plaza.estado = Estado.OCUPADA
-                            plazaOcupada = Ocupa(plaza, Cliente(matricula, tipoVehiculo), random.randint(100000, 999999))
-                            ocupas.append(plazaOcupada)
-                            print(f"Matricula: {plazaOcupada.cliente.matricula}, Id: {plazaOcupada.plaza.id}, Pin: {plazaOcupada.pin}")
-                        else:
-                            print("No hay plazas disponibles")
+                        try:
+                            tipoVehiculo = list(TipoVehiculo)[int(input()) - 1]
+                            if (tipoVehiculo == TipoVehiculo.TURISMO and disponiblesTurismo > 0) or (tipoVehiculo == TipoVehiculo.MOTOCICLETA and disponiblesMotos > 0) or (tipoVehiculo == TipoVehiculo.MOVILIDADREDUCIDA and disponiblesReducidas > 0) :
+                                matricula = input("Por favor introduzca su matrícula: ")
+                                plaza = [plaza for plaza in plazasDisponibles if plaza.tipoPlaza.tipo == tipoVehiculo][0]
+                                plaza.estado = Estado.OCUPADA
+                                plazaOcupada = Ocupa(plaza, Cliente(matricula, tipoVehiculo), random.randint(100000, 999999))
+                                ocupas.append(plazaOcupada)
+                                print(f"Matricula: {plazaOcupada.cliente.matricula}, Id: {plazaOcupada.plaza.id}, Pin: {plazaOcupada.pin}")
+                            else:
+                                print("No hay plazas disponibles")
+                        except:
+                            print("Introduzca una opción válida")
                     else:
                         print("No hay plazas disponibles")
 
                 elif seleccionSubmenu == 2:
-                    matricula = input("Por favor introduzca su matrícula: ")
-                    nPlaza = int(input("Introduzca el número de la plaza de aparcamiento: "))
-                    pin = int(input("Por último, introduzca el pin que se le proporcionó al estacionar: "))
                     try:
-                        ocupa = next(ocupa for ocupa in ocupas if ocupa.plaza.id == nPlaza and ocupa.cliente.matricula == matricula and ocupa.pin == pin)
-                        ocupa.activo = False
-                        ocupa.salida = datetime.now()
-                        tiempoEstacionado = divmod((ocupa.salida - ocupa.entrada).total_seconds(), 60)[0]
-                        ocupa.costeTotal = ocupa.plaza.tipoPlaza.tarifa * tiempoEstacionado
-                        ocupa.plaza.estado = Estado.LIBRE
-                        print(f"El coste total ha sido de {ocupa.costeTotal} €")
+                        matricula = input("Por favor introduzca su matrícula: ")
+                        nPlaza = int(input("Introduzca el número de la plaza de aparcamiento: "))
+                        pin = int(input("Por último, introduzca el pin que se le proporcionó al estacionar: "))
+                        ocupasEncontrados = [ocupa for ocupa in ocupas if ocupa.plaza.id == nPlaza and ocupa.cliente.matricula == matricula and ocupa.pin == pin]
+                        if(len(ocupa) >= 1):
+                            ocupa = ocupasEncontrados[0]
+                            ocupa.activo = False
+                            ocupa.salida = datetime.now()
+                            tiempoEstacionado = divmod((ocupa.salida - ocupa.entrada).total_seconds(), 60)[0]
+                            ocupa.costeTotal = ocupa.plaza.tipoPlaza.tarifa * tiempoEstacionado
+                            ocupa.plaza.estado = Estado.LIBRE
+                            print(f"El coste total ha sido de {ocupa.costeTotal} €")
+                        else:
+                            print("No se encuentra el vehículo estacionado.")
                     except:
-                        print("Los datos no coinciden")
+                        print("Por favor introduzca una plaza y pin válidos")
 
                 elif seleccionSubmenu == 3:
                     dni = input("Bienvenido de nuevo, por favor, introduzca su dni: ")
@@ -128,7 +140,7 @@ def mainMethod():
                         cliente.plaza.estado = Estado.ABONOOCUPADA
                         ocupas.append(Ocupa(cliente.plaza, cliente, cliente.pin, costeTotal=0))
                     except:
-                        print("Ha habido un error en los datos.")
+                        print("No se encuentra el vehículo con los datos proporcionados.")
 
                 elif seleccionSubmenu == 4:
                     dni = input("Bienvenido de nuevo, por favor, introduzca su dni: ")
@@ -140,14 +152,15 @@ def mainMethod():
                         cliente.plaza.estado = Estado.ABONOLIBRE
                         ocupa.activo = False
                     except:
-                        print("Ha habido un error en los datos")
-                elif seleccionSubmenu == 0:
-                    pass
+                        print("No se encuentra el vehículo con los datos proporcionados.")
 
         elif seleccionMenu == 2:
             while seleccionSubmenu != 0:
                 printMenuAdmin()
-                seleccionSubmenu = int(input())
+                try:
+                    seleccionSubmenu = int(input())
+                except:
+                    print("Por favor introduzca un número.")
 
                 if seleccionSubmenu == 1:
                     plazasDisponibles = len([plaza for plaza in plazas if plaza.estado == Estado.LIBRE])
@@ -156,22 +169,25 @@ def mainMethod():
                     printPlazas(plazas)
 
                 elif seleccionSubmenu == 2:
-                    print("Introduzca la fecha a partir de la que consultar.")
-                    anioInicio = input("Año: ")
-                    mesInicio = input("Mes: ")
-                    diaInicio = input("Día: ")
-                    horaInicio = input("Hora: ")
-                    minutosInicio = input("Minutos: ")
-                    inicio = datetime(int(anioInicio), int(mesInicio), int(diaInicio), int(horaInicio), int(minutosInicio))
-                    print("Introduzca la fecha hasta la que consultar.")
-                    anioFin = input("Año: ")
-                    mesFin = input("Mes: ")
-                    diaFin = input("Día: ")
-                    horaFin = input("Hora: ")
-                    minutosFin = input("Minutos: ")
-                    fin = datetime(int(anioFin), int(mesFin), int(diaFin), int(horaFin), int(minutosFin))
-                    cobros = [ocupa for ocupa in ocupas if (not ocupa.activo) and (ocupa.costeTotal > 0 and ocupa.salida < fin and ocupa.salida > inicio)]
-                    printCobros(cobros)
+                    try:
+                        print("Introduzca la fecha a partir de la que consultar.")
+                        anioInicio = input("Año: ")
+                        mesInicio = input("Mes: ")
+                        diaInicio = input("Día: ")
+                        horaInicio = input("Hora: ")
+                        minutosInicio = input("Minutos: ")
+                        inicio = datetime(int(anioInicio), int(mesInicio), int(diaInicio), int(horaInicio), int(minutosInicio))
+                        print("Introduzca la fecha hasta la que consultar.")
+                        anioFin = input("Año: ")
+                        mesFin = input("Mes: ")
+                        diaFin = input("Día: ")
+                        horaFin = input("Hora: ")
+                        minutosFin = input("Minutos: ")
+                        fin = datetime(int(anioFin), int(mesFin), int(diaFin), int(horaFin), int(minutosFin))
+                        cobros = [ocupa for ocupa in ocupas if (not ocupa.activo) and (ocupa.costeTotal > 0 and ocupa.salida < fin and ocupa.salida > inicio)]
+                        printCobros(cobros)
+                    except:
+                        print("Ha habido un error al obtener las fechas. Indique el año, mes, dia, etc, solo con números.")
 
                 elif seleccionSubmenu == 3:
                     clientesAbonados = [cliente for cliente in clientes if isinstance(cliente, Abonado) and cliente.activo]
@@ -179,7 +195,10 @@ def mainMethod():
 
                 elif seleccionSubmenu == 4:
                     printMenuAbonados()
-                    seleccionSubmenu2 = int(input())
+                    try:
+                        seleccionSubmenu2 = int(input())
+                    except:
+                        print("Por favor introduzca un número.")
 
                     if seleccionSubmenu2 == 1:
                         dni = input("Dni del abonado: ")
@@ -187,22 +206,25 @@ def mainMethod():
                         apellidos = input("Apellidos del abonado: ")
                         email = input("Email del abonado: ")
 
-                        print("Seleccione el tipo de abono:")
-                        for i, abono in enumerate(abonos):
-                            print(f"{i+1}. {abono.nombre} - {abono.precio}€")
-                        tipoAbono = abonos[int(input()) - 1]
-                        tarjeta = input("Tarjeta del abonado: ")
+                        try:
+                            print("Seleccione el tipo de abono:")
+                            for i, abono in enumerate(abonos):
+                                print(f"{i+1}. {abono.nombre} - {abono.precio}€")
+                            tipoAbono = abonos[int(input()) - 1]
+                            tarjeta = input("Tarjeta del abonado: ")
 
-                        printMenuTipoVehiculo()
-                        tipoVehiculo = list(TipoVehiculo)[int(input()) - 1]
-                        matricula = input("Matricula del vehículo: ")
-                        plaza = next(plaza for plaza in plazas if plaza.estado == Estado.LIBRE and plaza.tipoPlaza.tipo == tipoVehiculo)
-                        pin = random.randint(100000, 999999)
+                            printMenuTipoVehiculo()
+                            tipoVehiculo = list(TipoVehiculo)[int(input()) - 1]
+                            matricula = input("Matricula del vehículo: ")
+                            plaza = next(plaza for plaza in plazas if plaza.estado == Estado.LIBRE and plaza.tipoPlaza.tipo == tipoVehiculo)
+                            pin = random.randint(100000, 999999)
 
-                        nuevoCliente = Abonado(matricula, tipoVehiculo, dni, nombre, apellidos, email, tarjeta, tipoAbono, datetime.now(), datetime.now() + timedelta(days = 30 * tipoAbono.duracion), True, plaza, pin)
-                        clientes.append(nuevoCliente)
-                        plaza.estado = Estado.ABONOLIBRE
-                        print("El cliente se ha suscrito con éxito.")
+                            nuevoCliente = Abonado(matricula, tipoVehiculo, dni, nombre, apellidos, email, tarjeta, tipoAbono, datetime.now(), datetime.now() + timedelta(days = 30 * tipoAbono.duracion), True, plaza, pin)
+                            clientes.append(nuevoCliente)
+                            plaza.estado = Estado.ABONOLIBRE
+                            print("El cliente se ha suscrito con éxito.")
+                        except:
+                            print("Por favor escoja una opción válida.")
 
                     elif seleccionSubmenu2 == 2:
                         dni = input("Introduzca el DNI del abonado a modificar: ")
@@ -250,7 +272,10 @@ def mainMethod():
                 elif seleccionSubmenu == 5:
                     print("1. Consultar los abonos que caducan en un mes")
                     print("2. Consultar los abonos que caducan en menos de 10 días")
-                    seleccionSubmenu2 = int(input())
+                    try:
+                        seleccionSubmenu2 = int(input())
+                    except:
+                        print("Por favor introduzca un número.")
 
                     if seleccionSubmenu2 == 1:
                         mes = int(input("Indique el nº del mes que quiere consultar: "))

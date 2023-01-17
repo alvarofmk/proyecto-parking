@@ -62,6 +62,8 @@ def printCobros(cobros):
             f"Plaza {cobro.plaza.id}({cobro.plaza.tipoPlaza.tipo.value}) - {cobro.entrada.strftime('%d/%m/%Y, %H:%M:%S')} hasta {cobro.salida.strftime('%d/%m/%Y, %H:%M:%S')} - Total = {cobro.costeTotal} €")
 
 def printAbonados(clientesAbonados):
+    if len(clientesAbonados) == 0:
+        print("No hay ningún cliente abonado actualmente.")
     for cliente in clientesAbonados:
         print(
             f"{cliente.nombre} {cliente.apellidos}: Suscripcion {cliente.tipoAbono.nombre}, caduca el {cliente.fechaCancelacion.strftime('%d de %B del %Y')}")
