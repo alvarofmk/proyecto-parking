@@ -10,6 +10,13 @@ from Entities.plaza import Plaza
 from Entities.Enums.tipoVehiculo import TipoVehiculo
 from datetime import datetime, timedelta
 def initConfig():
+
+    open("Persistence/tiposAbonos.pickle", "w").close()
+    open("Persistence/ocupas.pickle", "w").close()
+    open("Persistence/plazas.pickle", "w").close()
+    open("Persistence/clientes.pickle", "w").close()
+    open("Persistence/tipos.pickle", "w").close()
+
     numPlazas = 200
     plazasTurismos = TipoPlaza(TipoVehiculo.TURISMO, 0.12, 70)
     plazasMotos = TipoPlaza(TipoVehiculo.MOTOCICLETA, 0.08, 15)
@@ -34,7 +41,7 @@ def initConfig():
     pickle.dump(abonos, archivoAbonos)
     archivoAbonos.close()
 
-    archivoTipos = open("../Persistence/tipos.pickle", "wb")
+    archivoTipos = open("Persistence/tipos.pickle", "wb")
     pickle.dump(tiposPlazas, archivoTipos)
     archivoTipos.close()
 
@@ -45,7 +52,7 @@ def initConfig():
             plazas.append(Plaza(preid + i, tipo))
 
     cNormal = Cliente("123D", TipoVehiculo.TURISMO)
-    cAbonado = Abonado("234F", TipoVehiculo.TURISMO, "54219289D", "Álvaro", "Franco", "alvaro@ejemplo", "2222222222", "semestral", datetime.now() - timedelta(days = 30), datetime.now() + timedelta(days = 150), True, plazas[3], 111111)
+    cAbonado = Abonado("234F", TipoVehiculo.TURISMO, "54219289D", "Álvaro", "Franco", "alvaro@ejemplo", "2222222222", semestral, datetime.now() - timedelta(days = 30), datetime.now() + timedelta(days = 150), True, plazas[3], 111111)
     clientes.append(cNormal)
     clientes.append(cAbonado)
     plazas[3].estado = Estado.ABONOLIBRE
@@ -58,14 +65,14 @@ def initConfig():
     ocupas.append(ocupacion1)
     ocupas.append(ocupacion2)
 
-    archivoPlazas = open("../Persistence/plazas.pickle", "wb")
+    archivoPlazas = open("Persistence/plazas.pickle", "wb")
     pickle.dump(plazas, archivoPlazas)
     archivoPlazas.close()
 
-    archivoOcupa = open("../Persistence/ocupas.pickle", "wb")
+    archivoOcupa = open("Persistence/ocupas.pickle", "wb")
     pickle.dump(ocupas, archivoOcupa)
     archivoOcupa.close()
 
-    archivoClientes = open("../Persistence/clientes.pickle", "wb")
+    archivoClientes = open("Persistence/clientes.pickle", "wb")
     pickle.dump(clientes, archivoClientes)
     archivoClientes.close()

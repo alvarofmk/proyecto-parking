@@ -1,6 +1,7 @@
 import random
 from time import strftime
 
+from Entities import abonado
 from Entities.abonado import Abonado
 from Entities.cliente import Cliente
 from Entities.Enums.estado import Estado
@@ -33,13 +34,13 @@ archivoClientes.close()
 archivoTipos.close()
 
 seleccionMenu = 1;
-seleccionSubmenu = 1;
-seleccionSubmenu2 = 0;
 
 while seleccionMenu != 0:
 
     seleccionSubmenu = 1;
     seleccionSubmenu2 = 1;
+    seleccionSubmenu3 = 1;
+    confirmacion = 1;
     printMenuRoles()
     seleccionMenu = int(input())
 
@@ -110,7 +111,7 @@ while seleccionMenu != 0:
                 print("Introduzca su matrícula")
                 matricula = input()
                 try:
-                    cliente = next(cliente for cliente in clientes if cliente.activo and cliente.matricula == matricula and cliente.dni == dni)
+                    cliente = next(cliente for cliente in clientes if isinstance(cliente, Abonado) and cliente.activo and cliente.matricula == matricula and cliente.dni == dni)
                     print(f"Puede proceder a estacionar su vehiculo, su plaza es la {cliente.plaza.id}")
                     cliente.plaza.estado = Estado.ABONOOCUPADA
                     ocupas.append(Ocupa(cliente.plaza, cliente, cliente.pin, costeTotal=0))
@@ -196,9 +197,50 @@ while seleccionMenu != 0:
                     plaza.estado = Estado.ABONOLIBRE
                     print("El cliente se ha suscrito con éxito.")
                 elif seleccionSubmenu2 == 2:
-                    pass
+                    dni = input("Introduzca el DNI del abonado a modificar: ")
+                    try:
+                        abonado = next(cliente for cliente in clientes if isinstance(cliente, Abonado) and cliente.activo and cliente.dni == dni)
+                        print("1. Modificar datos del cliente")
+                        print("2. Renovar abono")
+                        seleccionSubmenu3 = int(input())
+                        if seleccionSubmenu3 == 1:
+                            print("Introduzca los datos a continuación, para mantener el actual, simplemente pulse intro.")
+                            abonado.dni = input(f"Dni del abonado (actual: {abonado.dni}): ") or abonado.dni
+                            abonado.nombre = input(f"Nombre del abonado (actual: {abonado.nombre}): ") or abonado.nombre
+                            abonado.apellidos = input(f"Apellidos del abonado (actual: {abonado.apellidos}): ") or abonado.apellidos
+                            abonado.email = input(f"Email del abonado (actual: {abonado.email}): ") or abonado.email
+                            abonado.matricula = input(f"Matricula del vehículo (actual: {abonado.matricula}): ") or abonado.matricula
+                            abonado.tarjeta = input(f"Tarjeta del abonado (actual: {abonado.tarjeta}): ") or abonado.tarjeta
+                        elif seleccionSubmenu3 == 2:
+                            caducidadAntigua = abonado.fechaCancelacion
+                            abonado.fechaCancelacion = caducidadAntigua + timedelta(days=30 * abonado.tipoAbono.duracion)
+                            print(f"El abono {abonado.tipoAbono.nombre} del cliente con DNI {abonado.dni} caducaba el {caducidadAntigua.strftime('%d de %B del %Y')}")
+                            print(f"Su abono se ha extendido por {abonado.tipoAbono.duracion} meses, la nueva fecha de cancelación es el {abonado.fechaCancelacion.strftime('%d de %B del %Y')}")
+                    except:
+                        print("No se ha encontrado al cliente, su dni está erróneo o no es actualmente un abonado")
                 elif seleccionSubmenu2 == 3:
-                    pass
+                    dni = input("Introduzca el DNI del abonado a dar de baja: ")
+                    try:
+                        abonado = next(
+                            cliente for cliente in clientes if isinstance(cliente, Abonado) and cliente.dni == dni)
+                        if abonado.activo:
+                            print(
+                                f"El cliente tiene una suscripción hasta el {abonado.fechaCancelacion.strftime('%d de %B del %Y')}.")
+                            print(
+                                "Este cliente perderá su abono de forma inmediata a pesar del tiempo de suscripción restante,")
+                            print("¿está seguro de querer dar de baja al cliente? (esta acción no tiene vuelta atrás):")
+                            print("1. Si")
+                            print("2. No")
+                            confirmacion = int(input())
+                            if confirmacion == 1:
+                                abonado.plaza = [plaza for plaza in plazas if plaza.id == abonado.plaza.id][0]
+                                abonado.activo = False
+                                abonado.plaza.estado = Estado.LIBRE
+                                print("El cliente se ha dado de baja con éxito.")
+                        else:
+                            print("El cliente no tiene un abono activo.")
+                    except:
+                        print("No se ha encontrado el cliente")
             elif seleccionSubmenu == 5:
                 print("1. Consultar los abonos que caducan en un mes")
                 print("2. Consultar los abonos que caducan en menos de 10 días")
